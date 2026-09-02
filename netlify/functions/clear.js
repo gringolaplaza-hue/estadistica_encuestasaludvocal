@@ -22,7 +22,7 @@ exports.handler = async (event) => {
   if (!valid) return { statusCode: 401, body: JSON.stringify({ error: 'Contraseña incorrecta.' }) };
 
   try {
-    const store = getStore('vox-submissions');
+    const store = getStore({ name: 'vox-submissions', siteID: process.env.NETLIFY_SITE_ID, token: process.env.NETLIFY_AUTH_TOKEN });
     const { blobs } = await store.list();
     await Promise.all(blobs.map((b) => store.delete(b.key)));
 
