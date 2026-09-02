@@ -16,8 +16,11 @@ async function readConfig(store){
 exports.handler=async(event)=>{
   if(event.httpMethod!=='POST') return json(405,{error:'Método no permitido'});
   let body; try{body=JSON.parse(event.body||'{}')}catch{return json(400,{error:'JSON inválido'})}
-  try{
-    const store=getStore(STORE);
+  try{const store = getStore({
+  name: STORE,
+  siteID: process.env.NETLIFY_SITE_ID,
+  token: process.env.NETLIFY_AUTH_TOKEN
+});
     let config=await readConfig(store);
     const envPassword=String(process.env.ADMIN_PASSWORD||'');
     if(body.action==='status') return json(200,{configured:!!(config?.password||envPassword),hasSecretQuestion:!!config?.question});
