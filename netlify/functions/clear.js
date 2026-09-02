@@ -15,7 +15,7 @@ exports.handler = async (event) => {
     return { statusCode: 400, body: JSON.stringify({ error: 'JSON inválido' }) };
   }
 
-  const authStore = getStore('vox-auth');
+  const authStore = getStore({ name: 'vox-auth', siteID: process.env.NETLIFY_SITE_ID, token: process.env.NETLIFY_AUTH_TOKEN });
   const config = await authStore.get('config', { type: 'json' });
   const adminPassword = process.env.ADMIN_PASSWORD || '';
   const valid = (config?.password && verify(body.password, config.password)) || (adminPassword && body.password === adminPassword);
