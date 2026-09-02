@@ -1,0 +1,7 @@
+{
+  "name":"vox-insight",
+  "version":"1.0.1",
+  "private":true,
+  "description":"VOX INSIGHT",
+  "dependencies":{"@netlify/blobs":"^8.1.0"}
+}

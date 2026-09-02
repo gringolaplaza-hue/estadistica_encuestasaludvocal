@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>VOX INSIGHT • Salud Vocal Integral</title>
+<style>
+:root {
+    --bg: #07111f; --panel: #0d1b2c; --line: #1e3853; 
+    --cyan: #2ee9ff; --blue: #3977ff; --green: #30e6a0; 
+    --yellow: #ffc857; --red: #ff5575; --text: #edf7ff; --muted: #8fa8bd;
+}
+* { box-sizing: border-box; }
+body {
+    margin: 0; background: radial-gradient(circle at 15% 15%, #123252 0, #07111f 36%, #040a12 100%);
+    color: var(--text); font-family: Inter, 'Segoe UI', Arial, sans-serif; min-height: 100vh;
+}
+.app { max-width: 900px; margin: auto; padding: 30px 20px; }
+.brand { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+.logo { font-weight: 900; letter-spacing: 2px; font-size: 26px; }
+.logo b { color: var(--cyan); }
+.badge { border: 1px solid var(--line); padding: 7px 14px; border-radius: 999px; color: var(--cyan); font-size: 13px; background: #071727; font-weight: 600; }
+
+.card {
+    background: linear-gradient(145deg, #0d1b2cdd, #091522dd); border: 1px solid var(--line);
+    border-radius: 24px; padding: 35px; box-shadow: 0 25px 80px #0008; backdrop-filter: blur(12px);
+}
+.hidden { display: none !important; }
+.fade-in { animation: fadeIn 0.5s ease forwards; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+
+h1 { margin: 0 0 10px; font-size: 32px; color: #fff; }
+.lead, .muted { color: var(--muted); line-height: 1.6; }
+.lead { font-size: 16px; margin-bottom: 25px; }
+
+label { display: block; margin: 20px 0 8px; color: #cce1f3; font-size: 14px; font-weight: 500; }
+input, select, textarea {
+    width: 100%; background: #071321; border: 1px solid var(--line); border-radius: 14px;
+    padding: 15px; color: var(--text); font-size: 15px; transition: 0.3s;
+}
+input:focus, select:focus, textarea:focus {
+    outline: none; border-color: var(--cyan); box-shadow: 0 0 15px rgba(46, 233, 255, 0.15);
+}
+textarea { min-height: 130px; resize: vertical; line-height: 1.5; }
+
+.btn {
+    border: 0; border-radius: 14px; padding: 15px 24px; font-weight: 800; font-size: 15px;
+    cursor: pointer; background: linear-gradient(135deg, var(--cyan), var(--blue));
+    color: #03101b; box-shadow: 0 8px 25px #2ee9ff30; transition: 0.3s;
+}
+.btn:hover { transform: translateY(-2px); box-shadow: 0 12px 35px #2ee9ff50; filter: brightness(1.1); }
+.btn.alt { background: #132438; color: #d9edfc; border: 1px solid var(--line); box-shadow: none; }
+.btn.alt:hover { background: #1a324d; border-color: #3b5f85; }
+.btn.danger { background: #3d141e; color: #ff8fa5; border: 1px solid #7a2236; }
+.btn.danger:hover { background: #5c1b2b; }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; box-shadow: none; }
+.actions { display: flex; gap: 12px; justify-content: space-between; margin-top: 30px; flex-wrap: wrap;}
+
+.progress { height: 8px; background: #14283b; border-radius: 10px; overflow: hidden; margin: 18px 0; }
+.progress i { display: block; height: 100%; background: linear-gradient(90deg, var(--cyan), var(--blue)); transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+.qhead { display: flex; justify-content: space-between; gap: 10px; color: var(--muted); font-size: 14px; font-weight: 600; }
+.chip { padding: 6px 12px; border: 1px solid var(--line); border-radius: 999px; color: var(--cyan); background: #071727; font-size: 12px;}
+
+.question { font-size: 26px; line-height: 1.4; margin: 25px 0; font-weight: 600; }
+.opts { display: grid; gap: 12px; }
+.opt {
+    padding: 18px; border: 1px solid var(--line); border-radius: 14px; background: #091624;
+    cursor: pointer; transition: 0.2s; font-size: 16px; font-weight: 500;
+}
+.opt:hover { border-color: #4b759b; background: #0d1e30; }
+.opt.sel { border-color: var(--cyan); background: #10263a; box-shadow: inset 0 0 20px #2ee9ff12; color: var(--cyan); }
+
+.tip {
+    margin-top: 25px; padding: 18px; border-left: 4px solid var(--yellow);
+    background: #2a230f66; border-radius: 10px; color: #ffe9a7; font-size: 14px; line-height: 1.5;
+}
+.tip b { display: block; color: var(--yellow); margin-bottom: 6px; font-size: 15px; }
+
+.timerScreen { min-height: 420px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+.clock {
+    width: 120px; height: 120px; border: 5px solid var(--cyan); border-radius: 50%;
+    position: relative; box-shadow: 0 0 40px #2ee9ff44; animation: pulse 1.2s infinite; margin-bottom: 30px;
+}
+.clock:before, .clock:after { content: ""; position: absolute; left: 50%; top: 50%; width: 4px; background: var(--cyan); transform-origin: bottom; border-radius: 10px; }
+.clock:before { height: 35px; transform: translate(-50%, -100%) rotate(25deg); }
+.clock:after { height: 45px; transform: translate(-50%, -100%) rotate(150deg); }
+@keyframes pulse { 50% { transform: scale(1.05); box-shadow: 0 0 60px #2ee9ff88; } }
+
+.feedback { margin-top: 20px; padding: 16px; border-radius: 12px; background: #330d17; border: 1px solid #651f2e; color: #ffb3c1; text-align: center; font-weight: 600; }
+
+.barChart {
+    height: 320px; display: flex; align-items: flex-end; gap: 8px; padding: 20px 10px 40px;
+    border-left: 1px solid var(--line); border-bottom: 1px solid var(--line); perspective: 900px;
+    background: linear-gradient(#0a1624aa, #07111faa); margin: 30px 0; border-radius: 8px;
+}
+.bar {
+    flex: 1; min-width: 15px; position: relative; background: linear-gradient(90deg, #0d6d84, #2ee9ff 48%, #a7f7ff);
+    transform: skewY(-2deg) rotateY(-10deg); box-shadow: 6px 6px 0 #12445a, 0 0 15px #2ee9ff55;
+    border-radius: 4px 4px 0 0; transition: height 1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.bar:after { content: attr(data-v) "%"; position: absolute; top: -26px; left: 50%; transform: translateX(-50%) skewY(2deg); font-size: 11px; color: #dffcff; font-weight: bold; }
+.bar span { position: absolute; top: calc(100% + 10px); left: 50%; transform: translateX(-50%) skewY(2deg); font-size: 11px; color: var(--muted); font-weight: 600; }
+
+.kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin: 25px 0; }
+.kpi { padding: 20px; border: 1px solid var(--line); border-radius: 16px; background: #091624; text-align: center; }
+.kpi small { color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; font-size: 11px; }
+.kpi strong { display: block; font-size: 32px; margin-top: 8px; color: var(--cyan); font-weight: 900; }
+
+.review { margin-top: 30px; background: #071321; border-radius: 16px; border: 1px solid var(--line); overflow: hidden; }
+.history-box { max-height: 350px; overflow-y: auto; }
+.history-box::-webkit-scrollbar { width: 8px; }
+.history-box::-webkit-scrollbar-thumb { background: var(--line); border-radius: 10px; }
+.row { padding: 18px 20px; border-bottom: 1px solid #183047; }
+.row:last-child { border-bottom: none; }
+.row strong { color: #bfeeff; font-size: 15px; display: block; margin-bottom: 6px; }
+.row.ctx { background: #0b1c2e; }
+.row .muted { font-size: 14px; margin-top: 6px; display: inline-block; color: var(--cyan); }
+
+.interview { border: 1px solid var(--line); border-radius: 16px; padding: 25px; margin: 20px 0; background: #091624; }
+.interview h3 { margin: 0 0 12px; color: var(--cyan); font-size: 20px; }
+.interview p { margin: 0 0 15px; color: #cce1f3; line-height: 1.5; }
+.interview .muted { background: #13273b; padding: 12px; border-radius: 8px; font-size: 13px; margin-bottom: 15px; border-left: 3px solid var(--blue); }
+
+.privacy { margin-top: 20px; padding: 15px 20px; border: 1px solid var(--line); border-radius: 12px; background: #091624; color: var(--muted); font-size: 13px; line-height: 1.5; }
+.checkbox-wrap { display: flex; align-items: center; gap: 10px; margin-top: 20px; cursor: pointer; color: #cce1f3; }
+.checkbox-wrap input { width: 20px; height: 20px; cursor: pointer; }
+
+@media(max-width: 700px) {
+    .kpis { grid-template-columns: 1fr 1fr; }
+    .question { font-size: 22px; }
+    .card { padding: 25px 20px; }
+}
+@media print {
+    body { background: #fff; color: #111; }
+    .app { padding: 0; max-width: 100%; }
+    .card { border: none; box-shadow: none; background: #fff; padding: 0; filter: none; }
+    h1 { color: #000; }
+    .btn, .actions, .timerScreen, .privacy { display: none !important; }
+    .kpi { border-color: #ddd; background: #fafafa; }
+    .kpi strong { color: #000; }
+    .barChart { border-color: #ddd; background: none; page-break-inside: avoid; }
+    .bar { background: #555 !important; box-shadow: none !important; }
+    .bar:after { color: #000; }
+    .row { border-color: #eee; page-break-inside: avoid; }
+    .row strong { color: #222; }
+    .row.ctx { background: #f9f9f9; }
+    .row .muted { color: #555; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+    <div class="brand">
+        <div class="logo">VOX <b>INSIGHT</b></div>
+        <div class="badge">EVALUACIÓN INTEGRAL</div>
+    </div>
+
+    <!-- PASO 1: INTRO Y DATOS -->
+    <section id="intro" class="card fade-in">
+        <h1>Diagnóstico de Salud Vocal</h1>
+        <p class="lead">Instrumento integral orientado a relevar el uso vocal laboral, las condiciones de trabajo y los síntomas asociados a la fatiga ocupacional. Consta de dos etapas: métricas estructuradas y espacio de profundización.</p>
+        
+        <label>Nombre o código del participante</label>
+        <input id="name" placeholder="Ej.: Juan Pérez / Agente 014">
+        
+        <label>Rol en la plataforma</label>
+        <select id="role">
+            <option value="" disabled selected>Seleccioná una opción...</option>
+            <option value="Operador">Operador / Agente de atención</option>
+            <option value="Supervisor">Supervisor / Team Leader</option>
+            <option value="Calidad">Analista de Calidad / QA</option>
+            <option value="Soporte">Soporte Técnico / Backoffice</option>
+            <option value="Otro">Otro</option>
+        </select>
+
+        <label>Sector o campaña</label>
+        <input id="sector" placeholder="Ej.: Ventas / Atención al cliente / Soporte">
+        
+        <label class="checkbox-wrap">
+            <input type="checkbox" id="anon">
+            Prefiero que el reporte se genere de forma anónima
+        </label>
+        
+        <div class="privacy">Tus respuestas serán guardadas de forma centralizada para generar métricas estadísticas orientadas a la salud ocupacional. El acceso a las estadísticas globales está protegido por contraseña de administrador.</div>
+        
+        <div class="actions">
+            <button class="btn alt" id="btnDashIntro" onclick="showDashboard()">📊 Ver Estadísticas Globales</button>
+            <button class="btn" style="margin-left:auto;" onclick="start()">Comenzar diagnóstico →</button>
+        </div>
+    </section>
+
+    <!-- PASO 2: ENCUESTA CUANTITATIVA -->
+    <section id="quiz" class="card hidden">
+        <div class="qhead">
+            <span id="counter"></span>
+            <span class="chip" id="category"></span>
+        </div>
+        <div class="progress"><i id="prog"></i></div>
+        <div class="question" id="question"></div>
+        <div id="numWrap" class="hidden">
+            <input id="numInput" type="number" min="0" max="99" placeholder="Ingresá un número">
+        </div>
+        <div class="opts" id="options"></div>
+        <div class="tip">
+            <b>💡 Dato clave</b>
+            <span id="advice"></span>
+        </div>
+        <div id="fb" class="feedback hidden"></div>
+        <div class="actions">
+            <button class="btn alt" id="backBtn" onclick="backQ()">← Anterior</button>
+            <button class="btn" onclick="answer()">Siguiente →</button>
+        </div>
+    </section>
+
+    <!-- PANTALLA DE CARGA INTERMEDIA -->
+    <section id="wait" class="card hidden">
+        <div class="timerScreen">
+            <div class="clock"></div>
+            <h2>Procesando respuestas</h2>
+            <p class="muted">Registrando variables y preparando la etapa de profundización...</p>
+        </div>
+    </section>
+
+    <!-- PASO 3: ENTREVISTA / PREGUNTAS DE PROFUNDIZACIÓN -->
+    <section id="interview" class="card hidden">
+        <h1>Etapa de Profundización</h1>
+        <p class="lead">Para completar el diagnóstico, necesitamos conocer más detalles sobre tu experiencia diaria. Elegí la opción que mejor te represente en cada pregunta; si querés, podés ampliar tu respuesta con texto libre.</p>
+        
+        <div id="interviewBox"></div>
+        
+        <div class="actions">
+            <span></span>
+            <button class="btn" onclick="finishInterview()">Finalizar y generar reporte →</button>
+        </div>
+    </section>
+
+    <!-- PASO 4: RESULTADOS UNIFICADOS -->
+    <section id="results" class="card hidden">
+        <h1>Reporte Integral de Salud Vocal</h1>
+        <p id="summary" class="lead"></p>
+        
+        <div class="kpis">
+            <div class="kpi"><small>Índice de bienestar</small><strong id="k1"></strong></div>
+            <div class="kpi"><small>Variables de riesgo</small><strong id="k2"></strong></div>
+            <div class="kpi"><small>Rol evaluado</small><strong id="k3" style="font-size:22px; margin-top:14px;"></strong></div>
+            <div class="kpi"><small>Estado de Alerta</small><strong id="k4"></strong></div>
+        </div>
+        
+        <h2>📡 Perfil de Riesgo (Métricas estructuradas)</h2>
+        <p class="muted">Las barras más bajas indican áreas con mayor riesgo vocal o presencia de síntomas negativos.</p>
+        <div id="chart" class="barChart"></div>
+        
+        <h2>📝 Registro Completo (Cuali-Cuantitativo)</h2>
+        <div id="review" class="review"></div>
+        
+        <div class="actions">
+            <button class="btn alt" onclick="location.reload()">Nueva evaluación</button>
+            <button class="btn alt" onclick="showDashboard()">📊 Estadísticas Globales</button>
+            <button class="btn" onclick="savePDF()">📄 Imprimir / PDF</button>
+        </div>
+    </section>
+
+    <!-- PASO 5: GATE DE CONTRASEÑA DE ADMINISTRADOR -->
+    <section id="adminGate" class="card hidden">
+        <h1>🔒 Acceso Administrador</h1>
+        <p class="lead">Las estadísticas globales reúnen las respuestas de todos los participantes que completaron la encuesta desde cualquier dispositivo. Ingresá la contraseña de administrador para verlas.</p>
+        
+        <label>Contraseña</label>
+        <input id="adminPwInput" type="password" placeholder="Contraseña de administrador" onkeydown="if(event.key==='Enter'){unlockDashboard();}">
+        <div id="adminErr" class="feedback hidden"></div>
+        
+        <div class="actions">
+            <button class="btn alt" onclick="location.reload()">← Volver al Inicio</button>
+            <button class="btn alt" onclick="beginRecovery()">¿Olvidaste la contraseña?</button>
+            <button class="btn" id="adminBtn" onclick="unlockDashboard()">Ingresar →</button>
+        </div>
+    </section>
+
+    <!-- PASO 5B: CONFIGURACIÓN / RECUPERACIÓN DE ADMINISTRADOR -->
+    <section id="adminSetup" class="card hidden">
+        <h1>🔐 Administrar acceso</h1>
+        <p id="authSetupLead" class="lead">Creá la contraseña que protegerá todas las respuestas y estadísticas.</p>
+
+        <div id="setupFields">
+            <label>Nueva contraseña de administrador</label>
+            <input id="newPw" type="password" minlength="8" placeholder="Mínimo 8 caracteres">
+            <label>Repetir contraseña</label>
+            <input id="newPw2" type="password" minlength="8" placeholder="Repetí la contraseña">
+            <label>Pregunta secreta</label>
+            <input id="secretQuestion" placeholder="Ej.: ¿Cuál era el nombre de mi primera mascota?">
+            <label>Respuesta de la pregunta secreta</label>
+            <input id="secretAnswer" type="password" placeholder="Respuesta para recuperar el acceso">
+        </div>
+        <div id="recoverFields" class="hidden">
+            <div class="privacy"><b>Pregunta secreta:</b><br><span id="recoveryQuestion"></span></div>
+            <label>Respuesta</label>
+            <input id="recoveryAnswer" type="password" placeholder="Ingresá la respuesta secreta">
+            <label>Nueva contraseña</label>
+            <input id="recoveryPw" type="password" minlength="8" placeholder="Mínimo 8 caracteres">
+            <label>Repetir nueva contraseña</label>
+            <input id="recoveryPw2" type="password" minlength="8" placeholder="Repetí la contraseña">
+        </div>
+        <div id="authMsg" class="feedback hidden"></div>
+        <div class="actions">
+            <button class="btn alt" onclick="showDashboard()">← Volver</button>
+            <button class="btn" id="authActionBtn" onclick="saveAdminSetup()">Guardar acceso →</button>
+        </div>
+    </section>
+
+    <!-- PASO 6: DASHBOARD DE ESTADÍSTICAS GLOBALES -->
+    <section id="dashboard" class="card hidden">
+        <h1>📊 Estadísticas Globales</h1>
+        <p class="lead">Resumen de todas las evaluaciones enviadas por los participantes, desde cualquier dispositivo.</p>
+        
+        <div class="kpis">
+            <div class="kpi"><small>Total Evaluaciones</small><strong id="d_total">0</strong></div>
+            <div class="kpi"><small>Promedio Global</small><strong id="d_avg">0%</strong></div>
+            <div class="kpi"><small>Casos en Riesgo</small><strong id="d_risk">0</strong></div>
+            <div class="kpi"><small>Rol más frecuente</small><strong id="d_role" style="font-size:22px; margin-top:14px;">-</strong></div>
+        </div>
+        
+        <h2>Registro Histórico</h2>
+        <div class="review history-box" id="historyList"></div>
+        
+        <div class="actions" style="margin-top: 40px;">
+            <button class="btn alt" onclick="location.reload()">← Volver al Inicio</button>
+            <button class="btn alt" onclick="openAdminSettings()">🔐 Cambiar contraseña</button>
+            <button class="btn danger" onclick="clearHistory()">🗑️ Borrar todos los datos</button>
+        </div>
+    </section>
+</div>
+
+<script>
+let idx = 0, answers = [], interviewAnswers = {};
+let adminPw = null, serverHistory = [], authMode = 'setup';
+
+// [Categoria, Pregunta, Tipo(opt|num), Opciones, Ponderación, Consejo]
+const survey = [
+    ['Datos generales','Edad','num',null,null,'Registrá la edad en años cumplidos.'],
+    ['Datos generales','Antigüedad trabajando en call center','opt',['Menos de 1 año','Entre 1 y 3 años','Entre 4 y 6 años','Más de 6 años'],null,'Variable descriptiva cruzada para evaluación de fatiga crónica.'],
+    ['Datos generales','¿Cuántas horas por jornada utilizás la voz para llamadas o reuniones?','opt',['Menos de 2 horas','Entre 2 y 4 horas','Entre 4 y 6 horas','Más de 6 horas'],[100,75,45,20],'El tiempo de uso continuo es el principal factor de riesgo vocal.'],
+    ['Condiciones','¿Recibiste capacitación sobre cuidado y técnica vocal?','opt',['Sí','No'],[100,0],'La prevención y técnica reducen el riesgo de disfonías ocupacionales.'],
+    ['Condiciones','¿Disponés de pausas durante la jornada para descansar la voz?','opt',['Sí','No'],[100,0],'Las pausas permiten la recuperación de la mucosa laríngea.'],
+    ['Condiciones','¿Con qué frecuencia realizás esas pausas?','opt',['Siempre','Casi siempre','A veces','Casi nunca','Nunca'],[100,75,50,25,0],'Incluso breves descansos de 5 minutos marcan una diferencia clínica.'],
+    ['Síntomas','Durante el último año, ¿presentaste ronquera o cambios de voz por el trabajo?','opt',['Sí','No'],[0,100],'Se evalúa la disfonía como un factor directamente vinculado al esfuerzo laboral.'],
+    ['Síntomas','Durante el último año, ¿sentiste cansancio o fatiga al hablar?','opt',['Sí','No'],[0,100],'La fatiga es el síntoma temprano más frecuente del sobreuso.'],
+    ['Percepción','¿Cómo considerás el esfuerzo que realiza tu voz durante la jornada?','opt',['Muy bajo','Bajo','Moderado','Alto','Muy alto'],[100,75,50,25,0],'La percepción subjetiva es un excelente indicador de alerta temprana.'],
+    ['Clínica (Hiato)','¿Percibís que tu voz suena "soplada" o con escape de aire?','opt',['Nunca','A veces','Frecuentemente','Siempre'],[100,60,20,0],'La voz soplada es un signo clínico asociado al hiato glótico (cierre incompleto).'],
+    ['Clínica (Hiato)','¿Notás que tu voz empeora a medida que avanza tu turno laboral?','opt',['Nunca','A veces','Frecuentemente','Siempre'],[100,60,20,0],'El empeoramiento progresivo es característico de la fatiga por sobreesfuerzo.']
+];
+
+// [Categoria, Pregunta, Consejo, Opciones]
+const interviewQs = [
+    ['Desempeño y Rutina','¿En qué momento de tu turno sentís mayor desgaste vocal?','Pensá en tu jornada típica: volumen, ritmo y tensión de la voz.',
+        ['Al empezar el turno','A mitad de turno','Sobre el final del turno','No siento desgaste notorio']],
+    ['Historial de molestias','¿Tuviste algún episodio de dolor, ronquera o pérdida de voz importante por el trabajo?','Pensá si alguna vez sentiste síntomas fuertes por el uso vocal.',
+        ['Sí, en el último mes','Sí, hace más tiempo','Nunca tuve un episodio así']],
+    ['Ambiente y Herramientas','¿Cómo calificarías el ambiente físico de tu puesto de trabajo?','Considerá ruido de fondo, auriculares y clima del lugar.',
+        ['Adecuado, no me exige forzar la voz','Regular, a veces me obliga a forzar','Inadecuado, me obliga a forzar seguido']],
+    ['Propuesta de mejora','Si pudieras cambiar una condición de tu entorno laboral para cuidar tu voz, ¿cuál elegirías?','Elegí la que más impacto tendría en tu bienestar vocal.',
+        ['Más pausas o descansos','Mejores auriculares/equipo','Reducir ruido ambiente','Más capacitación en técnica vocal','Otra']]
+];
+
+function start() {
+    if (!document.getElementById('role').value) {
+        alert("Por favor, seleccioná tu rol en la plataforma para continuar.");
+        document.getElementById('role').focus();
+        return;
+    }
+    document.querySelectorAll('.card').forEach(c => c.classList.add('hidden'));
+    document.getElementById('quiz').classList.remove('hidden');
+    document.getElementById('quiz').classList.add('fade-in');
+    renderQ();
+}
+
+function renderQ() {
+    let q = survey[idx];
+    counter.textContent = `Pregunta ${idx + 1} de ${survey.length}`;
+    category.textContent = q[0];
+    prog.style.width = ((idx + 1) / survey.length * 100) + '%';
+    question.textContent = q[1];
+    advice.textContent = q[5];
+    
+    if (q[2] === 'num') {
+        numWrap.classList.remove('hidden');
+        options.innerHTML = '';
+        numInput.value = answers[idx]?.v ?? '';
+    } else {
+        numWrap.classList.add('hidden');
+        options.innerHTML = q[3].map((o, i) => 
+            `<div class="opt ${answers[idx]?.i === i ? 'sel' : ''}" onclick="pick(${i})">${o}</div>`
+        ).join('');
+    }
+    
+    backBtn.disabled = idx === 0;
+    fb.classList.add('hidden');
+}
+
+function pick(i) {
+    document.querySelectorAll('.opt').forEach(x => x.classList.remove('sel'));
+    document.querySelectorAll('.opt')[i].classList.add('sel');
+    answers[idx] = { i };
+}
+
+async function answer() {
+    let q = survey[idx];
+    if (q[2] === 'num') {
+        let v = numInput.value;
+        if (v === '' || v < 0) {
+            fb.textContent = 'Ingresá un valor numérico válido.';
+            fb.classList.remove('hidden');
+            return;
+        }
+        answers[idx] = { v: Number(v) };
+    } else {
+        if (!answers[idx]) {
+            fb.textContent = 'Seleccioná una opción para continuar.';
+            fb.classList.remove('hidden');
+            return;
+        }
+    }
+    
+    await savePartial();
+    document.getElementById('quiz').classList.add('hidden');
+    document.getElementById('wait').classList.remove('hidden');
+    
+    setTimeout(() => {
+        wait.classList.add('hidden');
+        if (idx < survey.length - 1) {
+            idx++;
+            quiz.classList.remove('hidden');
+            renderQ();
+        } else {
+            finishSurvey();
+        }
+    }, 700);
+}
+
+function backQ() {
+    if (idx > 0) { idx--; renderQ(); }
+}
+
+function finishSurvey() {
+    document.getElementById('quiz').classList.add('hidden');
+    document.getElementById('interview').classList.remove('hidden');
+    document.getElementById('interview').classList.add('fade-in');
+    
+    interviewBox.innerHTML = interviewQs.map((x, i) => 
+        `<div class="interview">
+            <h3>${i + 1}. ${x[0]}</h3>
+            <p>${x[1]}</p>
+            <div class="muted">💡 ${x[2]}</div>
+            <div class="opts" id="iopts${i}">
+                ${x[3].map((o, j) => `<div class="opt" onclick="pickInterview(${i},${j})">${o}</div>`).join('')}
+            </div>
+            <label class="checkbox-wrap" style="margin-top:15px;">
+                <input type="checkbox" id="iamp${i}" onchange="toggleAmplify(${i})">
+                ¿Querés ampliar o formular tu respuesta?
+            </label>
+            <textarea id="itext${i}" class="hidden" placeholder="Contanos más detalles si querés..." onchange="savePartial()"></textarea>
+        </div>`
+    ).join('');
+}
+
+function pickInterview(qi, oi) {
+    let opts = document.querySelectorAll(`#iopts${qi} .opt`);
+    opts.forEach(o => o.classList.remove('sel'));
+    opts[oi].classList.add('sel');
+    if (!interviewAnswers[qi]) interviewAnswers[qi] = {};
+    interviewAnswers[qi].option = interviewQs[qi][3][oi];
+    savePartial();
+}
+
+function toggleAmplify(qi) {
+    document.getElementById('itext' + qi).classList.toggle('hidden');
+}
+
+function finishInterview() {
+    let missing = interviewQs.some((x, i) => !interviewAnswers[i] || !interviewAnswers[i].option);
+    if (missing) {
+        alert('Por favor, seleccioná una opción en cada pregunta de la etapa de profundización.');
+        return;
+    }
+    interviewQs.forEach((x, i) => {
+        interviewAnswers[i].extra = document.getElementById('itext' + i).value.trim();
+    });
+    document.getElementById('interview').classList.add('hidden');
+    showResults();
+}
+
+async function showResults() {
+    // El participante nunca ve resultados parciales ni finales.
+    document.querySelectorAll('.card').forEach(c => c.classList.add('hidden'));
+    const wait = document.getElementById('wait');
+    wait.classList.remove('hidden');
+    try {
+        await submitCurrentEvaluation(true);
+        wait.classList.add('hidden');
+        document.getElementById('results').classList.remove('hidden');
+        document.getElementById('results').classList.add('fade-in');
+        document.getElementById('summary').textContent = 'La evaluación fue recibida correctamente. Los resultados y las respuestas detalladas son visibles únicamente para los administradores.';
+        document.querySelector('#results .kpis').classList.add('hidden');
+        document.getElementById('chart').classList.add('hidden');
+        document.querySelector('#results h2').classList.add('hidden');
+        document.getElementById('review').innerHTML = '<div class="row"><strong>✅ Evaluación registrada</strong><span class="muted">Tus respuestas fueron guardadas de forma centralizada. No se muestran resultados al participante.</span></div>';
+    } catch (e) {
+        wait.classList.add('hidden');
+        document.getElementById('interview').classList.remove('hidden');
+        alert('No se pudo registrar la evaluación. ' + (e.message || 'Verificá la conexión e intentá nuevamente.'));
+    }
+}
+
+function buildPayload(status='completed') {
+    const isAnon = document.getElementById('anon').checked;
+    const name = isAnon ? 'Anónimo' : (document.getElementById('name').value || 'Sin Nombre');
+    const role = document.getElementById('role').value;
+    const sector = document.getElementById('sector').value || 'Sin Sector';
+    const scored = survey.map((q,i) => q[2] === 'opt' && q[4] && answers[i] ? {i,v:q[4][answers[i].i]} : null).filter(Boolean);
+    const avg = scored.length ? Math.round(scored.reduce((a,b)=>a+b.v,0)/scored.length) : 0;
+    const critical = scored.filter(x=>x.v<50).length;
+    return {
+        sessionId: window.__voxSessionId || (window.__voxSessionId = crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`),
+        status, name, role, sector, avg, critical,
+        progress: Math.min(survey.length, idx + 1),
+        answers: survey.map((q,i)=>({ question:q[1], value: answers[i] ? (q[2]==='num' ? answers[i].v : q[3][answers[i].i]) : '', score: answers[i] && q[4] ? q[4][answers[i].i] : null })),
+        interview: interviewQs.map((q,i)=>({ question:`${q[0]}: ${q[1]}`, option:interviewAnswers[i]?.option||'', extra:interviewAnswers[i]?.extra||'' }))
+    };
+}
+
+async function submitCurrentEvaluation(completed=false) {
+    const payload = buildPayload(completed ? 'completed' : 'partial');
+    const res = await fetch('/.netlify/functions/submit', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
+    const data = await res.json().catch(()=>({}));
+    if (!res.ok || !data.ok) throw new Error(data.error || 'No se pudo guardar');
+}
+
+async function savePartial() {
+    try { await submitCurrentEvaluation(false); } catch(e) { /* se reintenta al avanzar/finalizar */ }
+}
+
+// FUNCIONES DEL DASHBOARD (protegidas por contraseña de administrador)
+async function showDashboard() {
+    document.querySelectorAll('.card').forEach(c => c.classList.add('hidden'));
+    if (adminPw) { loadDashboardData(); return; }
+    try {
+        const r = await fetch('/.netlify/functions/auth', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'status'})});
+        const d = await r.json();
+        if (!d.configured) {
+            authMode='setup';
+            document.getElementById('adminSetup').classList.remove('hidden');
+            document.getElementById('authSetupLead').textContent='Primera configuración: creá la contraseña que protegerá las respuestas y estadísticas.';
+            document.getElementById('setupFields').classList.remove('hidden');
+            document.getElementById('recoverFields').classList.add('hidden');
+            document.getElementById('authActionBtn').textContent='Crear acceso →';
+            return;
+        }
+    } catch(e) {
+        const msg = document.getElementById('authMsg');
+        authMode='setup';
+        document.getElementById('adminSetup').classList.remove('hidden');
+        document.getElementById('authSetupLead').textContent='Primera configuración: creá la contraseña que protegerá las respuestas y estadísticas.';
+        document.getElementById('setupFields').classList.remove('hidden');
+        document.getElementById('recoverFields').classList.add('hidden');
+        document.getElementById('authActionBtn').textContent='Crear acceso →';
+        msg.textContent='No se pudo consultar la configuración anterior. Podés intentar crear el acceso nuevamente.';
+        msg.classList.remove('hidden');
+        return;
+    }
+    const gate = document.getElementById('adminGate');
+    gate.classList.remove('hidden'); gate.classList.add('fade-in');
+    document.getElementById('adminPwInput').value = '';
+    document.getElementById('adminErr').classList.add('hidden');
+}
+
+async function unlockDashboard() {
+    const pwInput=document.getElementById('adminPwInput'), errBox=document.getElementById('adminErr'), pw=pwInput.value;
+    if(!pw) return;
+    const btn=document.getElementById('adminBtn'); btn.disabled=true; errBox.classList.add('hidden');
+    try {
+        const res=await fetch('/.netlify/functions/results',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:pw})});
+        const data=await res.json();
+        if(!res.ok || !data.ok){ errBox.textContent=data.error||'Contraseña incorrecta.'; errBox.classList.remove('hidden'); btn.disabled=false; return; }
+        adminPw=pw; serverHistory=data.records||[]; document.getElementById('adminGate').classList.add('hidden'); renderDashboard();
+    } catch(e){ errBox.textContent='Error de conexión. Intentá nuevamente.'; errBox.classList.remove('hidden'); }
+    btn.disabled=false;
+}
+
+async function loadDashboardData(){
+    try{
+        const res=await fetch('/.netlify/functions/results',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:adminPw})});
+        const data=await res.json();
+        if(!res.ok||!data.ok){adminPw=null;showDashboard();return;}
+        serverHistory=data.records||[];renderDashboard();
+    }catch(e){alert('Error de conexión al cargar las estadísticas.');}
+}
+
+function renderDashboard(){
+    const dash=document.getElementById('dashboard'); dash.classList.remove('hidden'); dash.classList.add('fade-in');
+    const history=serverHistory;
+    if(!history.length){ ['d_total','d_avg','d_risk'].forEach(id=>document.getElementById(id).textContent='0'); document.getElementById('d_role').textContent='-'; document.getElementById('historyList').innerHTML='<div class="row"><span class="muted">No hay datos registrados aún.</span></div>'; return; }
+    document.getElementById('d_total').textContent=history.length;
+    document.getElementById('d_avg').textContent=Math.round(history.reduce((a,c)=>a+Number(c.avg||0),0)/history.length)+'%';
+    document.getElementById('d_risk').textContent=history.filter(h=>h.avg<50).length;
+    const roles={}; let maxRole='-',maxCount=0; history.forEach(h=>{roles[h.role]=(roles[h.role]||0)+1;if(roles[h.role]>maxCount){maxCount=roles[h.role];maxRole=h.role;}}); document.getElementById('d_role').textContent=maxRole;
+    document.getElementById('historyList').innerHTML=history.slice().reverse().map(h=>{
+        const color=h.avg<50?'var(--red)':h.avg<75?'var(--yellow)':'var(--green)'; const status=h.status==='partial'?'PARCIAL':(h.avg<50?'Riesgo':h.avg<75?'Moderado':'Óptimo');
+        const dateStr=h.date?new Date(h.date).toLocaleString('es-AR',{dateStyle:'short',timeStyle:'short'}):'';
+        const detailId='detail-'+escapeHTML(h.id);
+        return `<div class="row"><strong>${escapeHTML(h.name)} (${escapeHTML(h.role||'-')}) - ${escapeHTML(h.sector||'-')}</strong><span class="muted">🗓️ ${dateStr} | Estado: <b>${status}</b> | 💙 Bienestar: <b style="color:${color}">${Number(h.avg||0)}%</b> | ⚠️ Variables Críticas: ${Number(h.critical||0)}</span><div class="actions" style="margin-top:12px"><button class="btn alt" onclick="toggleRecord('${escapeHTML(h.id)}')">👁️ Ver respuestas</button><button class="btn danger" onclick="deleteRecord('${escapeHTML(h.id)}')">🗑️ Eliminar</button></div><div id="${detailId}" class="review hidden">${renderRecordDetails(h)}</div></div>`;
+    }).join('');
+}
+
+function renderRecordDetails(h){
+    let out=`<div class="row ctx"><strong>Estado de registro</strong><span class="muted">${h.status==='partial'?'Encuesta parcial: el administrador puede ver el avance y las respuestas ya registradas.':'Encuesta finalizada.'}</span></div>`;
+    out+=`<div class="row"><strong>Primera parte</strong></div>`;
+    (h.answers||[]).forEach((a,i)=>{out+=`<div class="row"><strong>P${i+1}: ${escapeHTML(a.question)}</strong><span class="muted">➤ ${escapeHTML(a.value||'Sin respuesta')}${a.score!=null?' · Favorabilidad: '+Number(a.score)+'%':''}</span></div>`;});
+    out+=`<div class="row"><strong>Segunda parte</strong></div>`;
+    (h.interview||[]).forEach(a=>{out+=`<div class="row ctx"><strong>${escapeHTML(a.question)}</strong><span class="muted">➤ ${escapeHTML(a.option||'Sin respuesta')}${a.extra?' · Ampliación: "'+escapeHTML(a.extra)+'"':''}</span></div>`;});
+    return out;
+}
+function toggleRecord(id){ const el=document.getElementById('detail-'+id); if(el) el.classList.toggle('hidden'); }
+
+async function deleteRecord(id){
+    if(!confirm('¿Eliminar esta encuesta recibida? Esta acción no se puede deshacer.')) return;
+    try{ const res=await fetch('/.netlify/functions/delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:adminPw,id})}); const data=await res.json(); if(!res.ok||!data.ok){alert(data.error||'No se pudo eliminar.');return;} serverHistory=serverHistory.filter(x=>x.id!==id);renderDashboard(); }
+    catch(e){alert('Error de conexión al eliminar la encuesta.');}
+}
+
+async function clearHistory(){
+    if(!confirm('⚠️ ¿Estás seguro de que querés borrar TODAS las evaluaciones guardadas?\n\nEsta acción no se puede deshacer.')) return;
+    try{const res=await fetch('/.netlify/functions/clear',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:adminPw})});const data=await res.json();if(!res.ok||!data.ok){alert(data.error||'No se pudo borrar la información.');return;}serverHistory=[];renderDashboard();}catch(e){alert('Error de conexión al borrar los datos.');}
+}
+
+function openAdminSettings(){
+    document.querySelectorAll('.card').forEach(c=>c.classList.add('hidden'));
+    authMode='change'; document.getElementById('adminSetup').classList.remove('hidden');
+    document.getElementById('authSetupLead').textContent='Cambiá la contraseña y/o la pregunta secreta del administrador.';
+    document.getElementById('setupFields').classList.remove('hidden'); document.getElementById('recoverFields').classList.add('hidden');
+    document.getElementById('authActionBtn').textContent='Guardar cambios →'; document.getElementById('authMsg').classList.add('hidden');
+}
+async function beginRecovery(){
+    try{const res=await fetch('/.netlify/functions/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'question'})});const d=await res.json();if(!res.ok){alert(d.error||'No hay pregunta secreta configurada.');return;}authMode='recover';document.querySelectorAll('.card').forEach(c=>c.classList.add('hidden'));document.getElementById('adminSetup').classList.remove('hidden');document.getElementById('authSetupLead').textContent='Recuperación de contraseña';document.getElementById('setupFields').classList.add('hidden');document.getElementById('recoverFields').classList.remove('hidden');document.getElementById('recoveryQuestion').textContent=d.question;document.getElementById('authActionBtn').textContent='Recuperar acceso →';document.getElementById('authMsg').classList.add('hidden');}catch(e){alert('Error de conexión.');}
+}
+async function saveAdminSetup(){
+    const msg=document.getElementById('authMsg'); msg.classList.add('hidden');
+    let body={action:authMode};
+    if(authMode==='recover') body={action:'recover',answer:document.getElementById('recoveryAnswer').value,newPassword:document.getElementById('recoveryPw').value,newPassword2:document.getElementById('recoveryPw2').value};
+    else body={action:authMode,password:document.getElementById('newPw').value,password2:document.getElementById('newPw2').value,question:document.getElementById('secretQuestion').value,answer:document.getElementById('secretAnswer').value,currentPassword:adminPw};
+    try{const res=await fetch('/.netlify/functions/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});const d=await res.json();if(!res.ok||!d.ok){msg.textContent=d.error||'No se pudieron guardar los cambios.';msg.classList.remove('hidden');return;}adminPw=d.password||adminPw;alert('Acceso de administrador actualizado correctamente.');showDashboard();}catch(e){msg.textContent='Error de conexión. Intentá nuevamente.';msg.classList.remove('hidden');}
+}
+
+function savePDF(){window.print();}
+
+function escapeHTML(str) {
+    return String(str ?? '').replace(/[&<>'"]/g, tag => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+    }[tag] || tag));
+}
+</script>
+</body>
+</html>
